@@ -10,6 +10,9 @@
 #to do:
 #(3) i can get tif tags with imp.getProperties(), how do i set them?
 #	  only way i can see is looping through all {key,value} pairs?
+#
+# this is now part of bob-fiji-plugin GitHub repository
+#
 
 import os
 from ij import IJ, ImagePlus
