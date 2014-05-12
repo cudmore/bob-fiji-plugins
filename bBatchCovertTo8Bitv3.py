@@ -13,6 +13,7 @@
 #
 # this is now part of bob-fiji-plugin GitHub repository
 #
+#new line testing github 20140511
 
 import os
 from ij import IJ, ImagePlus
