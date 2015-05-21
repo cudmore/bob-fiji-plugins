@@ -6,7 +6,7 @@ This documentaiton is NOT done.
 
 I am happy to fix bugs and make improvements to these plugins, just drop me an email.
 
-If you use these plugins for your work, I ask that you give me credit. IF that is not possible, an email is always nice.
+If you use these plugins for your work, I ask that you give me credit. If that is not possible, an email is always nice.
 
 ###Installation
 
