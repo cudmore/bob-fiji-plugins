@@ -1,6 +1,6 @@
 ###bob-fiji-plugins
 
-These are [fiji][1] plugins.
+These are [fiji](1) plugins.
 
 This documentaiton is NOT done.
 
