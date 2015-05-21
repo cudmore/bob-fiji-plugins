@@ -1,6 +1,6 @@
 ###bob-fiji-plugins
 
-These are fiji plugins.
+These are [fiji][1] plugins.
 
 This documentaiton is not done.
 
@@ -15,3 +15,5 @@ Write documentation here
 ####Batch Convert To 8bit
 
 Write documentation here
+
+[1][http://robertcudmore.org]
