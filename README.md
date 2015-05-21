@@ -16,16 +16,23 @@ Download a .py file and copy the file into your Fiji plugins folder. If the plug
 
 Uses [MultiStackReg v1.45](http://bradbusse.net/downloads.html) to align a folder of .tif files. Has options to align on 1 channel and apply alignment to the other channel. 
 
+Useful if ...
+
 ####Batch Convert To 8bit
 
-Convert a folder of .tif files to 8-bit.
+Convert a folder of .tif files to 8-bit. Will also split 2 channel .tif files into 2 seperate files.
+
+Useful if ...
+
 
 ####Sliding Z-Projection
 
 Convert an image stack (opened in Fiji) to a sliding Z-PRojection. What is a sliding Z-Projection? See [here](http://www.robertcudmore.org/software/bSliding_Z_Projection.html).
 
+Useful if ...
 
-[1] : http://fiji.sc/Fiji
-[2] : http://fiji.sc/Downloads
-[3] : http://bradbusse.net/downloads.html
-[4] : http://www.robertcudmore.org/software/bSliding_Z_Projection.html
+###Links
+- [1] : http://fiji.sc/Fiji
+- [2] : http://fiji.sc/Downloads
+- [3] : http://bradbusse.net/downloads.html
+- [4] : http://www.robertcudmore.org/software/bSliding_Z_Projection.html
