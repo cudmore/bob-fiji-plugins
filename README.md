@@ -1,4 +1,17 @@
 ###bob-fiji-plugins
-- my first git repository
-- should hold and synch some of my Fiji plugins
-- i want to keep local source inside Fiji.app/Plugins folder, not sure if this is good?
+
+These are fiji plugins.
+
+This documentaiton is not done.
+
+I am happy to fix bugs and make improvements to these plugins, just drop me an email
+
+If you use these plugins for your work, I ask that you give me credit or at least an meial that you are using them.
+
+####bAlignBatch
+
+Write documentation here
+
+####Batch Convert To 8bit
+
+Write documentation here
