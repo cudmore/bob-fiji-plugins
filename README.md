@@ -1,6 +1,6 @@
 ###bob-fiji-plugins
 
-These are [fiji](1) plugins.
+These are [fiji](http://fiji.sc/Fiji) plugins written and maintained by [RObert Cudmore](http://robertcudmore.org).
 
 This documentaiton is NOT done.
 
@@ -10,11 +10,11 @@ If you use these plugins for your work, I ask that you give me credit. IF that i
 
 ###Installation
 
-Download a .py file and copy the file into your Fiji plugins folder. If the plugin doesn't work, first thing is to try and use an older version of Fiji, the lifeline version is available [here][2]. I would suggest 'Fiji Life-Line version, 2013 July 15'.
+Download a .py file and copy the file into your Fiji plugins folder. If the plugin doesn't work, first thing is to try and use an older [lifeline version of Fiji](http://fiji.sc/Downloads). I would suggest 'Fiji Life-Line version, 2013 July 15'.
 
 ####bAlignBatch
 
-Uses [MultiStackReg v1.45][3] to align a folder of .tif files. Has options to align on 1 channel and apply alignment to the other channel. 
+Uses [MultiStackReg v1.45](http://bradbusse.net/downloads.html) to align a folder of .tif files. Has options to align on 1 channel and apply alignment to the other channel. 
 
 ####Batch Convert To 8bit
 
@@ -22,7 +22,7 @@ Convert a folder of .tif files to 8-bit.
 
 ####Sliding Z-Projection
 
-Convert an image stack (opened in Fiji) to a sliding Z-PRojection. What is a sliding Z-Projection? See [here][4].
+Convert an image stack (opened in Fiji) to a sliding Z-PRojection. What is a sliding Z-Projection? See [here](http://www.robertcudmore.org/software/bSliding_Z_Projection.html).
 
 
 [1] : http://fiji.sc/Fiji
