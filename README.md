@@ -1,6 +1,6 @@
 ###bob-fiji-plugins
 
-These are [fiji](http://fiji.sc/Fiji) plugins written and maintained by [RObert Cudmore](http://robertcudmore.org).
+These are [fiji](http://fiji.sc/Fiji) plugins written and maintained by [Robert Cudmore](http://robertcudmore.org).
 
 This documentaiton is NOT done.
 
