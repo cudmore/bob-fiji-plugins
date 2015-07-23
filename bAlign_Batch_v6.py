@@ -18,8 +18,12 @@
 #   August, 2014: v0.1
 #   Oct 1, 2014: added gDoCrop and gAlignOnMiddleSlice
 #   Feb 23, 2015: fixed bug where globals were not being assigned when user changed them in dialog
-#   Feb 23, 2015: fixed bug where max project did not have _ch1/_ch2 appended to max .tif file nmae
-#
+#   Feb 23, 2015: fixed bug where max project did not have _ch1/_ch2 appended to max .tif file name
+#   March 18, 2015: Fixed import errors introduced in new versions of Fiji, now works for Fiji/ImageJ 1.47v
+#   July 1, 2015: Removing ScanImage4 'shift all pixels' and replacing with 'p[i] = 0 if p[i]>0, otherwise p[i] = p[i]'
+#   July 23, 2015: (1) removing linear calibration and shifting by 2^15-128 and checking for negative (see gLinearShift)
+#				   (2) updated bAlignBatch .tif header information
+#				   (3) aligning on cropped but then applying alignment to FULL IMAGE
 
 from ij import IJ, ImagePlus, WindowManager
 from ij.gui import GenericDialog, Roi
@@ -29,9 +33,15 @@ from java.io import File, FilenameFilter
 import sys, os, re, math
 from string import find
 import time # for yyyymmdd, for wait
-#import re
+from ij.plugin import Duplicator # for Duplicator().run(imp)
 
 #globals
+global gAlignBatchVersion
+gAlignBatchVersion = 6.5 # version 6.5 was created on 20150723
+
+global gLinearShift
+gLinearShift = 2^15 - 128
+
 global gGetNumChanFromScanImage
 global gNumChannels
 	
@@ -68,6 +78,15 @@ gAlignOnMiddleSlice = 1
 gAlignOnThisSlice = 0
 # 5
 gSave8bit = 0 # 0 is off, 1 is on
+
+### DEBUG ###
+gNumChannels = 1
+gDoCrop = 1 # 0 is off, 1 is on
+gCropLeft = 100 #default left of cropping rectangle
+gCropTop = 0 #default top of cropping rectangle
+gCropWidth = 300 #default width of cropping rectangle
+gCropHeight = 512 #default height of cropping rectangle
+gRemoveCalibration = 1 # 0 is off, 1 is on
 
 # only call if we know for sure there is a sourceFolder
 def Options(sourceFolder):
@@ -255,6 +274,7 @@ def runOneFolder(sourceFolder):
 def runOneFile(fullFilePath):
 
 	global gNumChannels
+	global gAlignBatchVersion
 	
 	if not os.path.isfile(fullFilePath):
 		bPrintLog('\nERROR: runOneFile() did not find file: ' + fullFilePath + '\n',0)
@@ -296,6 +316,8 @@ def runOneFile(fullFilePath):
 	infoStr = imp.getProperty("Info") #get all .tif tags
 	if not infoStr:
 		infoStr = ''
+	infoStr += 'bAlignBatch_Version=' + str(gAlignBatchVersion) + '\n'
+	infoStr += 'bAlignBatch_Time=' + time.strftime("%Y%m%d") + '_' + time.strftime("%H%M%S") + '\n'
 		
 	msgStr = 'w:' + str(width) + ' h:' + str(height) + ' slices:' + str(nSlices) \
 				+ ' channels:' + str(nChannels) + ' frames:' + str(nFrames) + ' bitDepth:' + str(bitDepth)
@@ -304,12 +326,6 @@ def runOneFile(fullFilePath):
 	path, filename = os.path.split(fullFilePath)
 	shortName, fileExtension = os.path.splitext(filename)
 
-	#this is too much work for ScanImage4
-	#try and guess channels if it is a scanimage file
-	#scanImage3 = string.find(infoStr, 'scanimage') != -1
-	#scanimage4 = find(infoStr, 'scanimage.SI4.channelSave = ')
-	#print 'scanimage4:', scanimage4
-	
 	#
 	# look for num channels in ScanImage infoStr
 	if gGetNumChanFromScanImage:
@@ -338,23 +354,44 @@ def runOneFile(fullFilePath):
 
 	# show
 	imp.show()
+	# split channels if necc. and grab the original window names
+	if gNumChannels == 1:
+		origImpWinStr = imp.getTitle() #use this when only one channel
+		origImpWin = WindowManager.getWindow(origImpWinStr) #returns java.awt.Window
+	
+	if gNumChannels == 2:
+		winTitle = imp.getTitle()
+		bPrintLog('Deinterleaving 2 channels...', 1)
+		IJ.run('Deinterleave', 'how=2 keep') #makes ' #1' and ' #2', with ' #2' frontmost
+		origCh1WinStr = winTitle + ' #1'
+		origCh2WinStr = winTitle + ' #2'
+		origCh1Imp = WindowManager.getImage(origCh1WinStr)
+		origCh2Imp = WindowManager.getImage(origCh2WinStr)
+		origCh1File = destFolder + shortName + '_ch1.tif'
+		origCh2File = destFolder + shortName + '_ch2.tif'
 
-	infoStr += 'bAlignBatch6=' + time.strftime("%Y%m%d") + '\n'
+	# work on a copy, mostly for alignment with cropping
+	copy = Duplicator().run(imp)
+	#copy.copyAttributes(imp) #don't copy attributes, it copies the name (which we do not want)
+	copy.show()
+	
 	#
-	# crop
+	# crop (on copy)
 	if gDoCrop:
 		bPrintLog('making cropping rectangle (left,top,width,height) ',1)
 		bPrintLog(str(gCropLeft) + ' ' + str(gCropTop) + ' ' +str(gCropWidth) + ' ' +str(gCropHeight), 2)
-		roi = Roi(gCropLeft, gCropTop, gCropWidth, gCropHeight) #left,top,width,height
-		imp.setRoi(roi)
 		
-		#time.sleep(1)
+		roi = Roi(gCropLeft, gCropTop, gCropWidth, gCropHeight) #left,top,width,height
+		copy.setRoi(roi)
+		
+		time.sleep(0.5) # otherwise, crop SOMETIMES failes. WHAT THE FUCK FIJI DEVELOPERS, REALLY, WHAT THE FUCK
 		
 		#bPrintLog('cropping', 1)
 		IJ.run('Crop')
 		infoStr += 'cropping=' + str(gCropLeft) + ',' + str(gCropTop) + ',' + str(gCropWidth) + ',' + str(gCropHeight) + '\n'
+	
 	#
-	# remove calibration
+	# remove calibration ( on original)
 	if gRemoveCalibration:
 		cal = imp.getCalibration()
 		calCoeff = cal.getCoefficients()
@@ -363,33 +400,51 @@ def runOneFile(fullFilePath):
 			bPrintLog(msgStr, 1)
 			
 			#remove calibration
-			bPrintLog('Removing Calibration', 2)
+			bPrintLog('\tRemoving Calibration', 2)
 			imp.setCalibration(None)
 				
 			#get and print out min/max
 			origMin = StackStatistics(imp).min
 			origMax = StackStatistics(imp).max
-			msgStr = 'orig min=' + str(origMin) + ' max=' + str(origMax)
+			msgStr = '\torig min=' + str(origMin) + ' max=' + str(origMax)
 			bPrintLog(msgStr, 2)
 			
-			#msgStr = 'adding calCoeff[0]='+str(calCoeff[0]) + ' to stack.'
-			#bPrintLog(msgStr, 2)
-			#subArgVal = 'value=%s stack' % (calCoeff[0],)
-			#IJ.run('Add...', subArgVal)
-
-			msgStr = 'Subtracting orig min '+str(origMin) + ' from stack.'
-			bPrintLog(msgStr, 2)
-			subArgVal = 'value=%s stack' % (origMin,)
-			IJ.run('Subtract...', subArgVal)
-
+			# 20150723, 'shift everybody over by linear calibration intercept calCoeff[0] - (magic number)
+			if 1:
+				# [1] was this
+				#msgStr = 'Subtracting original min '+str(origMin) + ' from stack.'
+				#bPrintLog(msgStr, 2)
+				#subArgVal = 'value=%s stack' % (origMin,)
+				#IJ.run('Subtract...', subArgVal)
+				# [2] now this
+				#msgStr = 'Adding calCoeff[0] '+str(calCoeff[0]) + ' from stack.'
+				#bPrintLog(msgStr, 2)
+				#addArgVal = 'value=%s stack' % (int(calCoeff[0]),)
+				#IJ.run('Add...', addArgVal)
+				# [3] subtract a magic number 2^15-2^7 = 32768 - 128
+				magicNumber = 2^15 - 128
+				msgStr = 'Subtracting a magic number '+str(magicNumber) + ' from stack.'
+				bPrintLog(msgStr, 2)
+				subArgVal = 'value=%s stack' % (origMin,)
+				IJ.run(imp, 'Subtract...', subArgVal)
+				
+			# 20150701, set any pixel <0 to 0
+			if 0:
+				ip = imp.getProcessor() # returns a reference
+				pixels = ip.getPixels() # returns a reference
+				msgStr = '\tSet all pixels <0 to 0. This was added 20150701 ...'
+				bPrintLog(msgStr, 2)
+				pixels = map(lambda x: 0 if x<0 else x, pixels)
+				bPrintLog('\t\t... done', 2)
+				
 			#get and print out min/max
 			newMin = StackStatistics(imp).min
 			newMax = StackStatistics(imp).max
-			msgStr = 'new min=' + str(newMin) + ' max=' + str(newMax)
+			msgStr = '\tnew min=' + str(newMin) + ' max=' + str(newMax)
 			bPrintLog(msgStr, 2)
 			
 			#without these, 8-bit conversion goes to all 0 !!! what the fuck !!!
-			bPrintLog('calling imp.resetStack() and imp.resetDisplayRange()', 2)
+			#bPrintLog('calling imp.resetStack() and imp.resetDisplayRange()', 2)
 			imp.resetStack()
 			imp.resetDisplayRange()
 
@@ -402,11 +457,11 @@ def runOneFile(fullFilePath):
 	#
 	# set up
 	if gNumChannels == 1:
-		impWinStr = imp.getTitle() #use this when only one channel
+		impWinStr = copy.getTitle() #use this when only one channel
 		impWin = WindowManager.getWindow(impWinStr) #returns java.awt.Window
 	
 	if gNumChannels == 2:
-		winTitle = imp.getTitle()
+		winTitle = copy.getTitle()
 		bPrintLog('Deinterleaving 2 channels...', 1)
 		IJ.run('Deinterleave', 'how=2 keep') #makes ' #1' and ' #2', with ' #2' frontmost
 		ch1WinStr = winTitle + ' #1'
@@ -418,14 +473,14 @@ def runOneFile(fullFilePath):
 		
 	#
 	# alignment
-	if gDoAlign and gNumChannels == 1 and imp.getNSlices()>1:
+	if gDoAlign and gNumChannels == 1 and copy.getNSlices()>1:
 		infoStr += 'AlignOnChannel=1' + '\n'
 		#snap to middle slice
 		if gAlignOnMiddleSlice:
-			middleSlice = int(math.floor(imp.getNSlices() / 2)) #int() is necc., python is fucking picky
+			middleSlice = int(math.floor(copy.getNSlices() / 2)) #int() is necc., python is fucking picky
 		else:
 			middleSlice = gAlignOnThisSlice
-		imp.setSlice(middleSlice)
+		copy.setSlice(middleSlice)
 		
 		transformationFile = destAlignmentFolder + shortName + '.txt'
 		
@@ -433,6 +488,12 @@ def runOneFile(fullFilePath):
 		stackRegParams = 'stack_1=[%s] action_1=Align file_1=[%s] stack_2=None action_2=Ignore file_2=[] transformation=[Rigid Body] save' %(impWin,transformationFile)
 		IJ.run('MultiStackReg', stackRegParams)
 		infoStr += 'AlignOnSlice=' + str(middleSlice) + '\n'
+
+		#20150723, we just aligned on a cropped copy, apply alignment to original imp
+		origImpTitle = imp.getTitle()
+		stackRegParams = 'stack_1=[%s] action_1=[Load Transformation File] file_1=[%s] stack_2=None action_2=Ignore file_2=[] transformation=[Rigid Body]' %(origImpTitle,transformationFile)
+		IJ.run('MultiStackReg', stackRegParams)		
+		
 	if gDoAlign and gNumChannels == 2 and ch1Imp.getNSlices()>1 and ch2Imp.getNSlices()>1:
 		#apply to gAlignThisChannel
 		alignThisWindow = ''
@@ -462,11 +523,21 @@ def runOneFile(fullFilePath):
 		stackRegParams = 'stack_1=[%s] action_1=Align file_1=[%s] stack_2=None action_2=Ignore file_2=[] transformation=[Rigid Body] save' %(alignThisWindow,transformationFile)
 		IJ.run('MultiStackReg', stackRegParams)
 	
-		#apply alignment to other window
-		bPrintLog('MultiStackReg applying alignment to:' + applyAlignmentToThisWindow, 1)
-		applyAlignThisImp = WindowManager.getImage(applyAlignmentToThisWindow)
-		stackRegParams = 'stack_1=[%s] action_1=[Load Transformation File] file_1=[%s] stack_2=None action_2=Ignore file_2=[] transformation=[Rigid Body]' %(applyAlignmentToThisWindow,transformationFile)
+		# 20150723, we just aligned on a copy, apply alignment to both channels of original
+		# ch1
+		bPrintLog('MultiStackReg applying alignment to:' + origCh1WinStr, 1)
+		stackRegParams = 'stack_1=[%s] action_1=[Load Transformation File] file_1=[%s] stack_2=None action_2=Ignore file_2=[] transformation=[Rigid Body]' %(origCh1WinStr,transformationFile)
 		IJ.run('MultiStackReg', stackRegParams)		
+		# ch2
+		bPrintLog('MultiStackReg applying alignment to:' + origCh2WinStr, 1)
+		stackRegParams = 'stack_1=[%s] action_1=[Load Transformation File] file_1=[%s] stack_2=None action_2=Ignore file_2=[] transformation=[Rigid Body]' %(origCh2WinStr,transformationFile)
+		IJ.run('MultiStackReg', stackRegParams)		
+		
+		#apply alignment to other window
+		#bPrintLog('MultiStackReg applying alignment to:' + applyAlignmentToThisWindow, 1)
+		#applyAlignThisImp = WindowManager.getImage(applyAlignmentToThisWindow)
+		#stackRegParams = 'stack_1=[%s] action_1=[Load Transformation File] file_1=[%s] stack_2=None action_2=Ignore file_2=[] transformation=[Rigid Body]' %(applyAlignmentToThisWindow,transformationFile)
+		#IJ.run('MultiStackReg', stackRegParams)		
 	elif gDoAlign:
 		bPrintLog('Skipping alignment, there may be only one slice?',3)
 						
@@ -482,18 +553,18 @@ def runOneFile(fullFilePath):
 
 	if gNumChannels == 2:
 		#ch1
-		ch1Imp.setProperty("Info", infoStr);
+		origCh1Imp.setProperty("Info", infoStr);
 		#bPrintLog('Saving:' + ch1File, 1)
-		bSaveStack(ch1Imp, ch1File)
+		bSaveStack(origCh1Imp, ch1File)
 		#max project
-		bSaveZProject(ch1Imp, destMaxFolder, shortName+'_ch1')
+		bSaveZProject(origCh1Imp, destMaxFolder, shortName+'_ch1')
 
 		#ch2
-		ch2Imp.setProperty("Info", infoStr);
+		origCh2Imp.setProperty("Info", infoStr);
 		#bPrintLog('Saving:' + ch2File, 1)
-		bSaveStack(ch2Imp, ch2File)
+		bSaveStack(origCh2Imp, ch2File)
  		#max project
-		bSaveZProject(ch2Imp, destMaxFolder, shortName+'_ch2')
+		bSaveZProject(origCh2Imp, destMaxFolder, shortName+'_ch2')
 		
  	#
 	# post convert to 8-bit and save
@@ -512,39 +583,44 @@ def runOneFile(fullFilePath):
 				
 			if gNumChannels == 2:
 				#
-				bPrintLog('Converting to 8-bit:' + ch1WinStr, 1)
-				IJ.selectWindow(ch1WinStr)
-				#IJ.run('resetMinAndMax()')
-				
-				#ch1Imp.resetStack()
-				#ch1Imp.resetDisplayRange()
+				bPrintLog('Converting to 8-bit:' + origCh1WinStr, 1)
+				IJ.selectWindow(origCh1WinStr)
 				
 				IJ.run("8-bit")
 				impFile = eightBitFolder + shortName + '_ch1.tif'
 				bPrintLog('Saving 8-bit:' + impFile, 2)
-				bSaveStack(ch1Imp, impFile)
+				bSaveStack(origCh1Imp, impFile)
 				#max project
-				bSaveZProject(ch1Imp, eightBitMaxFolder, shortName+'_ch1')
+				bSaveZProject(origCh1Imp, eightBitMaxFolder, shortName+'_ch1')
 
 				#
-				bPrintLog('Converting to 8-bit:' + ch2WinStr, 1)
-				IJ.selectWindow(ch2WinStr)
+				bPrintLog('Converting to 8-bit:' + origCh2WinStr, 1)
+				IJ.selectWindow(origCh2WinStr)
 				#IJ.run('resetMinAndMax()')
 				IJ.run("8-bit")
  				impFile = eightBitFolder + shortName + '_ch2.tif'
 				bPrintLog('Saving 8-bit:' + impFile, 2)
-				bSaveStack(ch2Imp, impFile)
+				bSaveStack(origCh2Imp, impFile)
 				#max project
-				bSaveZProject(ch2Imp, eightBitMaxFolder, shortName+'_ch2')
+				bSaveZProject(origCh2Imp, eightBitMaxFolder, shortName+'_ch2')
 				
 	#
 	# close original window
 	imp.changes = 0
 	imp.close()
+	#copy
+	copy.changes = 0
+	copy.close()
 
 	#
 	# close ch1/ch2
-	if 1 and gNumChannels == 2:
+	if gNumChannels == 2:
+		#original
+		origCh1Imp.changes = 0
+		origCh1Imp.close()
+		origCh2Imp.changes = 0
+		origCh2Imp.close()
+		#copy
 		ch1Imp.changes = 0
 		ch1Imp.close()
 		ch2Imp.changes = 0
