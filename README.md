@@ -29,7 +29,9 @@ Useful if ...
 
 Convert an image stack (opened in Fiji) to a sliding Z-PRojection. What is a sliding Z-Projection? See [here](http://www.robertcudmore.org/software/bSliding_Z_Projection.html).
 
-Useful if ...
+####Bob Neurite Tracer
+
+This is a FIJI plugin to automate fitting lines in 3D image stack from within Map Manager 3. This plugin is written in Java and is a derived version of Simple Neurite Tracer. It runs 'headless' from within Fiji, selecting it as a plugin by hand will not work.
 
 ###Links
 - [1] : http://fiji.sc/Fiji
