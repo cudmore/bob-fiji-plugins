@@ -31,10 +31,11 @@ Convert an image stack (opened in Fiji) to a sliding Z-PRojection. What is a sli
 
 ####Bob Neurite Tracer
 
-This is a FIJI plugin to automate fitting lines in 3D image stack from within Map Manager 3. This plugin is written in Java and is a derived version of Simple Neurite Tracer. It runs 'headless' from within Fiji, selecting it as a plugin by hand will not work.
+This is a FIJI plugin to automate fitting lines in 3D image stack from within Map Manager 3. This plugin is written in Java and is derived from [Simple Neurite Tracer](http://fiji.sc/Simple_Neurite_Tracer). It runs 'headless' within Fiji and is designed to be called from a command line, thus, manually selecting it from the Fiji plugins menu will not work.
 
 ###Links
 - [1] : http://fiji.sc/Fiji
 - [2] : http://fiji.sc/Downloads
 - [3] : http://bradbusse.net/downloads.html
 - [4] : http://www.robertcudmore.org/software/bSliding_Z_Projection.html
+- [5] : http://fiji.sc/Simple_Neurite_Tracer
