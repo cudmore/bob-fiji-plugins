@@ -16,7 +16,13 @@ Download a .py file and copy the file into your Fiji plugins folder. If the plug
 
 Uses [MultiStackReg v1.45](http://bradbusse.net/downloads.html) to align a folder of .tif files. Has options to align on 1 channel and apply alignment to the other channel. 
 
-Useful if ...
+You are required to use <font color="red"><strong>ImageJ 1.47v</strong></font>, this corresponds to the <font color="red"><strong>'Fiji Life-Line version, 2013 July 15'</strong></font> on the main [FIJI download page][1].
+
+####Download 'Fiji Life-Line version, 2013 July 15'
+  - Mac: http://fiji.sc/downloads/Life-Line/fiji-macosx-20130715.dmg
+  - Windows (64bit): http://fiji.sc/downloads/Life-Line/fiji-win64-20130715.zip
+  - Windows (32-bit): http://fiji.sc/downloads/Life-Line/fiji-win32-20130715.zip
+
 
 ####Batch Convert To 8bit
 
