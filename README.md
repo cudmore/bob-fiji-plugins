@@ -18,9 +18,10 @@ Uses [MultiStackReg v1.45](http://bradbusse.net/downloads.html) to align a folde
 
 <strong>IMPORTANT:</strong> bAlignBatch requires <font color="red"><strong>ImageJ 1.47v</strong></font>, this corresponds to the <font color="red"><strong>'Fiji Life-Line version, 2013 July 15'</strong></font> on the main [FIJI download page](http://fiji.sc/Downloads).
 
-####Download 'Fiji Life-Line version, 2013 July 15'
+Download 'Fiji Life-Line version, 2013 July 15'
+
   - Mac: http://fiji.sc/downloads/Life-Line/fiji-macosx-20130715.dmg
-  - Windows (64bit): http://fiji.sc/downloads/Life-Line/fiji-win64-20130715.zip
+  - Windows (64-bit): http://fiji.sc/downloads/Life-Line/fiji-win64-20130715.zip
   - Windows (32-bit): http://fiji.sc/downloads/Life-Line/fiji-win32-20130715.zip
 
 
