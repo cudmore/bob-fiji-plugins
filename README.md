@@ -12,7 +12,7 @@ If you use these plugins for your work, I ask that you give me credit. If that i
 
 Download a .py file and copy the file into your Fiji plugins folder. If the plugin doesn't work, first thing is to try and use an older [lifeline version of Fiji](http://fiji.sc/Downloads). I would suggest 'Fiji Life-Line version, 2013 July 15'.
 
-####- bAlignBatch
+####bAlignBatch
 
 Uses [MultiStackReg v1.45](http://bradbusse.net/downloads.html) to align a folder of .tif files. Has options to align on 1 channel and apply alignment to the other channel. 
 
@@ -24,18 +24,18 @@ Uses [MultiStackReg v1.45](http://bradbusse.net/downloads.html) to align a folde
   - Windows (32-bit): http://fiji.sc/downloads/Life-Line/fiji-win32-20130715.zip
 
 
-####- Batch Convert To 8bit
+####Batch Convert To 8bit
 
 Convert a folder of .tif files to 8-bit. Will also split 2 channel .tif files into 2 seperate files.
 
 Useful if ...
 
 
-####- Sliding Z-Projection
+####Sliding Z-Projection
 
 Convert an image stack (opened in Fiji) to a sliding Z-PRojection. What is a sliding Z-Projection? See [here](http://www.robertcudmore.org/software/bSliding_Z_Projection.html).
 
-####- Bob Neurite Tracer
+####Bob Neurite Tracer
 
 This is a FIJI plugin to automate fitting lines in 3D image stack from within [Map Manager 3](http://cudmore.github.io/mapmanager). This plugin is written in Java and is derived from [Simple Neurite Tracer](http://fiji.sc/Simple_Neurite_Tracer). It runs 'headless' within Fiji and is designed to be called from a command line, thus, manually selecting it from the Fiji plugins menu will not work.
 
