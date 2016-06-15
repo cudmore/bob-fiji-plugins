@@ -8,7 +8,7 @@ If you use these plugins for your work, I ask that you give me credit. If that i
 
 ##Installation
 
-Download a .py file and copy the file into your Fiji plugins folder. If the plugin doesn't work, first thing is to try and use an older [lifeline version of Fiji](http://fiji.sc/Downloads). I would suggest 'Fiji Life-Line version, 2013 July 15'.
+Download a .py file and copy the file into your Fiji plugins folder.
 
 ###bAlignBatch
 
@@ -22,7 +22,9 @@ If you are performing alignment, you need to have the [MultiStackReg v1.45](http
 
 If you are converting .lsm files, be sure to specify the correct number of channels. The plugin assumes all .lsm files in a folder have the same number of channels.
 
-<strong>IMPORTANT:</strong> bAlignBatch requires <font color="red"><strong>ImageJ 1.47v</strong></font>, this corresponds to the <font color="red"><strong>'Fiji Life-Line version, 2013 July 15'</strong></font> on the main [FIJI download page](http://fiji.sc/Downloads).
+#### Troubleshooting
+
+If the plugin doesn't work, first thing is to try and use an older [lifeline version of Fiji](http://fiji.sc/Downloads). Try the Fiji Life-Line version, 2013 July 15 on the main [FIJI download page](http://fiji.sc/Downloads).
   - Mac: http://fiji.sc/downloads/Life-Line/fiji-macosx-20130715.dmg
   - Windows (64-bit): http://fiji.sc/downloads/Life-Line/fiji-win64-20130715.zip
   - Windows (32-bit): http://fiji.sc/downloads/Life-Line/fiji-win32-20130715.zip
