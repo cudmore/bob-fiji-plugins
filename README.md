@@ -2,8 +2,6 @@
 
 These are [fiji](http://fiji.sc/Fiji) plugins written and maintained by [Robert Cudmore](http://robertcudmore.org).
 
-This documentaiton is NOT done.
-
 I am happy to fix bugs and make improvements to these plugins, just drop me an email.
 
 If you use these plugins for your work, I ask that you give me credit. If that is not possible, an email is always nice.
@@ -15,6 +13,8 @@ Download a .py file and copy the file into your Fiji plugins folder. If the plug
 ###bAlignBatch
 
 Uses [MultiStackReg v1.45](http://bradbusse.net/downloads.html) to align a folder of .tif files. Has options to align on 1 channel and apply alignment to the other channel. 
+
+If your converting .lsm files, be sure to specify the correct number of channels. The plugin assumes all .lsm files in a folder have the same number of channels.
 
 <strong>IMPORTANT:</strong> bAlignBatch requires <font color="red"><strong>ImageJ 1.47v</strong></font>, this corresponds to the <font color="red"><strong>'Fiji Life-Line version, 2013 July 15'</strong></font> on the main [FIJI download page](http://fiji.sc/Downloads).
   - Mac: http://fiji.sc/downloads/Life-Line/fiji-macosx-20130715.dmg
