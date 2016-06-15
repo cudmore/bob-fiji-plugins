@@ -12,9 +12,15 @@ Download a .py file and copy the file into your Fiji plugins folder. If the plug
 
 ###bAlignBatch
 
-Uses [MultiStackReg v1.45](http://bradbusse.net/downloads.html) to align a folder of .tif files. Has options to align on 1 channel and apply alignment to the other channel. 
+bAlignBatch will convert a directory of .tif/.lsm stacks and does 3 things
 
-If your converting .lsm files, be sure to specify the correct number of channels. The plugin assumes all .lsm files in a folder have the same number of channels.
+ 1. If stacks are two channels, it splits each stack into two .tif files: _ch1.tif and _ch2.tif
+ 2. Aligns slices within each stack using the MultistackReg plugin
+ 3. Will convert a directory of .lsm files into .tif files.
+ 
+If you are performing alignment, you need to have the [MultiStackReg v1.45](http://bradbusse.net/downloads.html) plugin installed.
+
+If you are converting .lsm files, be sure to specify the correct number of channels. The plugin assumes all .lsm files in a folder have the same number of channels.
 
 <strong>IMPORTANT:</strong> bAlignBatch requires <font color="red"><strong>ImageJ 1.47v</strong></font>, this corresponds to the <font color="red"><strong>'Fiji Life-Line version, 2013 July 15'</strong></font> on the main [FIJI download page](http://fiji.sc/Downloads).
   - Mac: http://fiji.sc/downloads/Life-Line/fiji-macosx-20130715.dmg
