@@ -21,7 +21,7 @@ If you are converting .lsm files, be sure to specify the correct number of chann
 
 #### Troubleshooting
 
-If the plugin doesn't work, first thing is to try and use an older [lifeline version of Fiji](http://fiji.sc/Downloads). Try the Fiji Life-Line version, 2013 July 15 on the main [FIJI download page](http://fiji.sc/Downloads).
+If a plugin doesn't work, first thing is to try and use an older [lifeline version of Fiji](http://fiji.sc/Downloads). Try the Fiji Life-Line version, 2013 July 15 on the main [FIJI download page](http://fiji.sc/Downloads).
   - Mac: http://fiji.sc/downloads/Life-Line/fiji-macosx-20130715.dmg
   - Windows (64-bit): http://fiji.sc/downloads/Life-Line/fiji-win64-20130715.zip
   - Windows (32-bit): http://fiji.sc/downloads/Life-Line/fiji-win32-20130715.zip
