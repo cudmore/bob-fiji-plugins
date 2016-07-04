@@ -1,22 +1,19 @@
 ###bob-fiji-plugins
 
-These are [fiji](http://fiji.sc/Fiji) plugins written and maintained by [Robert Cudmore](http://robertcudmore.org).
-
-I am happy to fix bugs and make improvements to these plugins, just drop me an email.
-
-If you use these plugins for your work, I ask that you give me credit. If that is not possible, an email is always nice.
+These are [fiji](http://fiji.sc/Fiji) plugins written and maintained by [Robert Cudmore](http://robertcudmore.org). I am happy to fix bugs and make improvements to these plugins, just drop me an email. If you use these plugins for your work, I ask that you give me credit. If that is not possible, an email is always nice.
 
 ##Installation
 
-Download a .py file and copy the file into your Fiji plugins folder.
+Download a .py file and copy the file into your Fiji plugins folder. To download the code, navigate to the page that displays the plugins code, click the **Raw** button, and then copy/pase the code into a text file.
 
 ###bAlignBatch
 
-bAlignBatch will convert a directory of .tif/.lsm stacks and does 3 things
+bAlignBatch will convert a directory of .tif/.lsm stacks and does 4 things
 
  1. If stacks are two channels, it splits each stack into two .tif files: _ch1.tif and _ch2.tif
- 2. Aligns slices within each stack using the MultistackReg plugin
- 3. Will convert a directory of .lsm files into .tif files.
+ 2. Will optionally align slices within each stack using the MultistackReg plugin. If the stacks are two color channels, alignment can be done on one channel and then applied to the other.
+ 3. Will output a maximal z-projection for each stack
+ 4. Will output a text file with the .tif header for each stack.
  
 If you are performing alignment, you need to have the [MultiStackReg v1.45](http://bradbusse.net/downloads.html) plugin installed.
 
