@@ -8,7 +8,7 @@ Download a .py file and copy the file into your Fiji plugins folder. To download
 
 ###bAlignBatch
 
-bAlignBatch will convert a directory of .tif/.lsm stacks and does 4 things
+bAlignBatch will convert a directory of .tif/.lsm stacks that can then be opened in [Map Manager][6]. It does the following:
 
  1. If stacks are two channels, it splits each stack into two .tif files: _ch1.tif and _ch2.tif
  2. Will optionally align slices within each stack using the MultistackReg plugin. If the stacks are two color channels, alignment can be done on one channel and then applied to the other.
@@ -48,3 +48,4 @@ This is a FIJI plugin to automate fitting lines in 3D image stack from within [M
 - [3] : http://bradbusse.net/downloads.html
 - [4] : http://www.robertcudmore.org/software/bSliding_Z_Projection.html
 - [5] : http://fiji.sc/Simple_Neurite_Tracer
+- [6] : http://cudmore.github.io/mapmanager
