@@ -49,3 +49,5 @@ This is a FIJI plugin to automate fitting lines in 3D image stack from within [M
 - [4] : http://www.robertcudmore.org/software/bSliding_Z_Projection.html
 - [5] : http://fiji.sc/Simple_Neurite_Tracer
 - [6] : http://cudmore.github.io/mapmanager
+
+[6]: http://cudmore.github.io/mapmanager
