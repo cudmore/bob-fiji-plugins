@@ -39,6 +39,6 @@ When new files are created, they will be placed in a new folder within the origi
 
 Most of these plugins will attempt to preserve .tif headers and in most cases will append new ones for import into [Map Manager](http://blog.cudmore.io/mapmanager). Common .tif headers that will be appended are date, time, voxel size, and scan parameters such as dwell time, scan line period, laser power, detector gains, etc. etc.
 
-As time marches on, so does new software versions. New versions of software that is out of our control including Zeiss, Scan Image, and Prairie View will sometimes break the code provided here. We are constantly updating these plugins to keep up with new software versions.
+As time marches on, so does new software versions. New versions of software that is out of our control including Zeiss/Zen, Scan Image, and Prairie View will sometimes break the code provided here. We are constantly updating these plugins to keep up with new software versions.
 
 The software is provided "as is" without warranty of any kind.

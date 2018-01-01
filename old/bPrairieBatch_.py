@@ -1,45 +1,82 @@
-#20161206
+#20160913
 #Robert H. Cudmore
 
-import bPrairie2Tif_
-import bAlignFolder_
-import bAverageFrames_
-import bConvertTo8Bit_v5_
-import bMaxProject_
+#imagej (java)
+from ij import IJ
+from ij import WindowManager, ImagePlus, ImageStack
+from ij.io import DirectoryChooser, FileSaver
+from ij.process import ImageConverter # default convert to 8-bit will scale. Turn it off. See: https://ilovesymposia.com/2014/02/26/fiji-jython/
+from ij.gui import GenericDialog
 
+#python
+import os, sys, time
+from os.path import basename
+import xml.etree.ElementTree as ET
+
+sys.path.append('/Users/cudmore/Dropbox/bob_fiji_plugins')
+import bPrairie2tif_ as bPrairie2tif
+import bAlignFolder_ as bAlignFolder
+
+'''
+Utility
+'''
+def bPrintLog(text, indent=0):
+	msgStr = ''
+	for i in (range(indent)):
+		msgStr += '    '
+		print '   ',
+	print text #to command line
+	IJ.log(msgStr + text)
+
+folderList = []
+folderList.append('/Volumes/t3/data/2016/11/20161118/20161118_a190b/')
+folderList.append('/Volumes/t3/data/2016/11/20161119/20161119_a188/')
+folderList.append('/Volumes/t3/data/2016/11/20161119/20161119_a189/')
+folderList.append('/Volumes/t3/data/2016/11/20161122/20161122_a189/')
+folderList.append('/Volumes/t3/data/2016/11/20161123/20161123_a189b/')
+
+'''
+Main
+'''
 if __name__ == '__main__': 
-	startTime = time.time()
+
+	# to do, allow user to specify a folder of folders
 	
 	bPrintLog('\n=================')
 	bPrintLog('Starting bPrairieBatch')
 
-	#ask user for folder, this is a folder that contains folders with single image .tif files
-	sourceFolder = DirectoryChooser("Please Choose A Directory Of Prairie .tif Folders").getDirectory()
+	startTime = time.time()
+	numStackFolders = 0
 
-	# convert folders of single .tif images to single .tif file for each stack or time series
-	numStackFolders, outFolder = prairie2tif.runOneMetaFolder(sourceFolder)
+	bPrairie2tif.globalOptions['medianFilter'] = 3
+	bPrairie2tif.globalOptions['convertToEightBit'] = True
 
-	# align
-	alignFolder = bAlignFolder. bAlignFolder(outFolder)
-	if alignFolder:
-		alignFolder.run()
-	outFolder = alignFolder.dstFolder
+	bAlignFolder.globalOptions['alignThisChannel'] = 2
+	bAlignFolder.globalOptions['medianFilter'] = 0 # set to 0 for no median filter
 
-	# average
-	tmpNum, outFolder = bAverageFrames.runOneFolder(outFolder)
-
-	# convert to 8 bit
-	#bConvertTo8Bit.gUseEnclosingFolderNameInOutputFolder = False
-	tmpNum, outFolder = bConvertTo8Bit.runOneFolder(outFolder)
-
-	# max project
-	bMaxProject.gUseEnclosingFolderNameInOutputFolder = False
-	tmpNum, outFolder = bMaxProject.runOneFolder(outFolder)
+	i = 1
 	
-	# max project
-	
+	for folder in folderList:
+
+		bPrintLog('===',0)
+		bPrintLog('   ' + time.strftime('%a, %d %b %Y %H:%M:%S', time.localtime()), 0)
+		bPrintLog('   bPrairieBatch is processing ' + str(i) + ' of ' + str(len(folderList)) + 'folder:' + folder, 0)
+		bPrintLog('===',0)
+
+		# convert prairie to tif
+		tmpNum, dstFolder = bPrairie2tif.runOneMetaFolder(folder)
+		numStackFolders += tmpNum
+		
+		# align
+		alignFolder = bAlignFolder.bAlignFolder(dstFolder, alignmentChannel=2)
+		if alignFolder:
+			alignFolder.run()
+
+		i += 1
+		
 	stopTime = time.time()
 	elapsedSeconds = round(stopTime-startTime,2)
 	elapsedMinutes = round(elapsedSeconds / 60.0, 2)
-	bPrintLog('Finished bPrairieBatch with ' + str(numTif) + ' tif files in ' + str(elapsedSeconds) + ' seconds (' + str(elapsedMinutes) + ' minutes)')
+	bPrintLog('Finished bPrairieBatch with ' + str(numStackFolders) + ' files in ' + str(elapsedSeconds) + ' seconds (' + str(elapsedMinutes) + ' minutes)')
 	bPrintLog('=================\n')
+	
