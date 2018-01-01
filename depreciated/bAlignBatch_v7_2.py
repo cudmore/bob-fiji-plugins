@@ -24,7 +24,9 @@
 #   July 23, 2015: (1) removing linear calibration and shifting by 2^15-128 and checking for negative (see gLinearShift)
 #				   (2) updated bAlignBatch .tif header information
 #				   (3) aligning on cropped but then applying alignment to FULL IMAGE
-
+#   July 30, 2015: Adding support for lsm (again).
+#   November 10, 2015: increasing linear shift for scanimage4, it is now 2^15-512 (was previously 2^15-128)
+#
 from ij import IJ, ImagePlus, WindowManager
 from ij.gui import GenericDialog, Roi
 from ij.process import StackStatistics
@@ -36,6 +38,7 @@ import time # for yyyymmdd, for wait
 from ij.plugin import Duplicator # for Duplicator().run(imp)
 
 #globals
+global gFileType # tif or lsm
 global gAlignBatchVersion
 
 global gLinearShift
@@ -59,10 +62,11 @@ global gSave8bit
 
 # 0...#5 are the order of operation
 # 0
+gFileType = 'lsm' # tif or lsm
 gAlignBatchVersion = 7.1 # version 7.1 was created on 20150723
 # 1
 gGetNumChanFromScanImage = 0 # 0 is off, 1 is on
-gNumChannels = 2
+gNumChannels = 1
 # 2
 gDoCrop = 0 # 0 is off, 1 is on
 gCropLeft = 100 #default left of cropping rectangle
@@ -71,9 +75,11 @@ gCropWidth = 850 #default width of cropping rectangle
 gCropHeight = 1024 #default height of cropping rectangle
 # 3
 gRemoveCalibration = 0 # 0 is off, 1 is on
-gLinearShift = math.pow(2,15) - 128
+#20151110 was this
+#gLinearShift = math.pow(2,15) - 128
+gLinearShift = math.pow(2,15) - 512
 # 4
-gDoAlign = 1 # 0 is off, 1 is on
+gDoAlign = 0 # 0 is off, 1 is on
 gAlignThisChannel = 1
 gAlignOnMiddleSlice = 1
 gAlignOnThisSlice = 0
@@ -93,6 +99,7 @@ if 0:
 # only call if we know for sure there is a sourceFolder
 def Options(sourceFolder):
 	#globals
+	global gFileType
 	global gGetNumChanFromScanImage
 	global gNumChannels
 		
@@ -112,13 +119,19 @@ def Options(sourceFolder):
 	global gSave8bit
 
 	tifNames = [file.name for file in File(sourceFolder).listFiles(Filter())]
+	lsmNames = [file.name for file in File(sourceFolder).listFiles(Filter_LSM())]
+	
 	numTifs = len(tifNames)
+	numLSM = len(lsmNames)
 
-	gd = GenericDialog('Align Batch 6 Options')
+	gd = GenericDialog('Align Batch 7 Options')
 	#gd.addStringField('Command: ', '')
 
 	gd.addMessage('Source Folder: ' + sourceFolder)
 	gd.addMessage('Number of .tif files: ' + str(numTifs))
+	gd.addMessage('Number of .lsm files: ' + str(numLSM))
+	
+	gd.addChoice('File Type', ['tif','lsm'], gFileType)
 	
 	#gd.setInsets(5,0,3)
 	#0
@@ -130,6 +143,7 @@ def Options(sourceFolder):
 	#1
 	gd.addCheckboxGroup(1, 1, ['Remove Linear Calibration From ScanImage 4.x'], [gRemoveCalibration], ['ScanImage4'])
 	gd.addNumericField('And offset (subtract) by this amount: ', gLinearShift, 0)
+	gd.addMessage('20151110, this number = 2^15-512 = 32768-512 = 32256')
 	
 	#2
 	gd.addCheckboxGroup(1, 1, ['Crop All Images (pixels)'], [gDoCrop], ['Crop'])
@@ -158,6 +172,8 @@ def Options(sourceFolder):
 		return 0
 	else:
 		print 'Reading values'
+		gFileType = gd.getNextChoice()
+		
 		gNumChannels = int(gd.getNextNumber())
 
 		gLinearShift = int(gd.getNextNumber())
@@ -191,6 +207,7 @@ def Options(sourceFolder):
 
 		# print to fiji console
 		bPrintLog('These are your global options:', 0)
+		bPrintLog('gFileType=' + gFileType, 1)
 		bPrintLog('gGetNumChanFromScanImage=' + str(gGetNumChanFromScanImage), 1)
 		bPrintLog('gNumChannels=' + str(gNumChannels), 1)
 		bPrintLog('gRemoveCalibration=' + str(gRemoveCalibration), 1)
@@ -206,6 +223,17 @@ class Filter(FilenameFilter):
 	def accept(self, dir, name):
 		reg = re.compile('\.tif$')
 		regMax = re.compile('\max.tif$')
+		m = reg.search(name)
+		m2 = regMax.search(name)
+		if m and not m2:
+			return 1
+		else:
+			return 0
+
+class Filter_LSM(FilenameFilter):
+	def accept(self, dir, name):
+		reg = re.compile('\.lsm$')
+		regMax = re.compile('\max.lsm$')
 		m = reg.search(name)
 		m2 = regMax.search(name)
 		if m and not m2:
@@ -258,18 +286,25 @@ def bSaveZProject(imp, dstFolder, shortname):
 		zImp.close()
 	
 def runOneFolder(sourceFolder):
+	global gFileType
+	
 	if not os.path.isdir(sourceFolder):
 		bPrintLog('\nERROR: runOneFolder() did not find folder: ' + sourceFolder + '\n',0)
 		return 0
 		
-	tifNames = [file.name for file in File(sourceFolder).listFiles(Filter())]
+	print 'xxx', gFileType
+	if gFileType=='tif':
+		tifNames = [file.name for file in File(sourceFolder).listFiles(Filter())]
+	else:
+		tifNames = [file.name for file in File(sourceFolder).listFiles(Filter_LSM())]
 	numTifs = len(tifNames)
 
 	bPrintLog(' ',0)
 	bPrintLog('=================================================',0)
-	bPrintLog('Align Batch 6',0)
+	bPrintLog('Align Batch 7',0)
+	bPrintLog('File type is ' + gFileType,1)
 	bPrintLog('sourceFolder: ' + sourceFolder,1)
-	bPrintLog('Number of .tif files: ' + str(numTifs),1)
+	bPrintLog('Number of files of file type: ' + str(numTifs),1)
 
 	count = 1
 	for tifName in tifNames:
@@ -281,7 +316,7 @@ def runOneFolder(sourceFolder):
 	bPrintLog('Done runOneFolder', 1)
 
 def runOneFile(fullFilePath):
-
+	global gFileType
 	global gNumChannels
 	global gAlignBatchVersion
 	
@@ -316,13 +351,46 @@ def runOneFile(fullFilePath):
 		if not os.path.isdir(eightBitMaxFolder):
 			os.makedirs(eightBitMaxFolder)
 	
-	# open image
-	imp = Opener().openImage(fullFilePath)
-
+	if gFileType=='tif':
+		# open .tif image
+		imp = Opener().openImage(fullFilePath)
+	else:
+		'''
+		This will make a window 'OME Metadata - <file>.lsm'
+		But then IJ.rundo not know how to access the contents of the window to get date/time
+		(CreationDate, PhysicalSizeX, PhysicalSizeY, PhysicalSizeZ)
+		IJ.run(imp, "Bio-Formats Importer", "open=/Users/cudmore/Desktop/lsm/C1_MC2_1.lsm autoscale color_mode=Default display_metadata display_ome-xml view=Hyperstack stack_order=XYCZT");
+		'''
+		print(1)
+		# open .lsm
+		cmdStr = 'open=%s autoscale color_mode=Default view=Hyperstack stack_order=XYCZT' % (fullFilePath,)
+		IJ.run('Bio-Formats Importer', cmdStr)
+		lsmpath, lsmfilename = os.path.split(fullFilePath)
+		lsWindow = lsmfilename
+		print(2)
+		imp = WindowManager.getImage(lsWindow)
+		
+		#20160630, try and get voxel size, CALIBRATION DOES NOT FUCKING WORK !!!
+		'''
+		print '1'
+		calibration = imp.getCalibration()
+		if calibration:
+			#print 'calibration:', calibration
+			pixelWidth = calibration.pixelWidth()
+			print '2'
+			pixelHeight = calibration.pixelHeight()
+			pixelDepth = calibration.pixelDepth()
+			unitStr = imp.DEFAULT_VALUE_UNIT
+			bPrintLog(str(pixelWidth) + str(pixelHeight) + str(pixelDepth) + str(unitStr), 2)
+		else:
+			bPrintLog('ERROR: Getting image calibration from .lsm file', 2)
+		'''
+		
 	# get parameters of image
 	(width, height, nChannels, nSlices, nFrames) = imp.getDimensions()
 	bitDepth = imp.getBitDepth()
 	infoStr = imp.getProperty("Info") #get all .tif tags
+	
 	if not infoStr:
 		infoStr = ''
 	infoStr += 'bAlignBatch_Version=' + str(gAlignBatchVersion) + '\n'
@@ -332,6 +400,12 @@ def runOneFile(fullFilePath):
 				+ ' channels:' + str(nChannels) + ' frames:' + str(nFrames) + ' bitDepth:' + str(bitDepth)
 	bPrintLog(msgStr, 1)
 	
+	if gFileType=='lsm':
+		numChannels, voxelx, voxely, voxelz = readlsmHeader(infoStr)
+		infoStr += 'bvoxelx=' + str(voxelx) + '\n'
+		infoStr += 'bvoxely=' + str(voxely) + '\n'
+		infoStr += 'bvoxelz=' + str(voxelz) + '\n'
+		
 	path, filename = os.path.split(fullFilePath)
 	shortName, fileExtension = os.path.splitext(filename)
 
@@ -637,21 +711,50 @@ def runOneFile(fullFilePath):
 		ch2Imp.close()
 
 	bPrintLog(time.strftime("%H:%M:%S") + ' finished runOneFile(): ' + fullFilePath, 1)
+
+def readlsmHeader(infoStr):
+	voxelx = 1
+	voxely = 1
+	voxelz = 1
+	numChannels = 1
+	for line in infoStr.split('\n'):
+		if line.find('VoxelSizeX') != -1:
+			voxelx = str(line.split('=')[1])
+		if line.find('VoxelSizeY') != -1:
+			voxely = str(line.split('=')[1])
+		if line.find('VoxelSizeZ') != -1:
+			voxelz = str(line.split('=')[1])
+		if line.find('SizeC') != -1:
+			numChannels = str(line.split('=')[1])
+			
+	return numChannels, voxelx, voxely, voxelz
 	
 #
 # called when invoked as a plugin via Fiji plugins menu
 def run():
 	bPrintLog(' ', 0)
 	bPrintLog('=====================================', 0)
-	bPrintLog('Running bAlign_Batch_v6', 0)
+	bPrintLog('Running bAlign_Batch_v7', 0)
 	bPrintLog('=====================================', 0)
 
 	if len(sys.argv) < 2:
 		print "   We need a hard-drive folder with .tif stacks as input"
-		print "	  Usage: ./fiji-macosx bALign_Batch_6 <full-path-to-folder>/"
+		print "	  Usage: ./fiji-macosx bALign_Batch_7 <full-path-to-folder>/"
 		# Prompt user for a folder
 		sourceFolder = DirectoryChooser("Please Choose A Directory Of .tif Files").getDirectory()
 		if not sourceFolder:
+			return 0
+		strippedFolder = sourceFolder.replace(' ', '')
+		if sourceFolder != strippedFolder:
+			print 'found a space in specified path. Pease remove spaces and try again.'
+			print 'path:', sourceFolder
+			errorDialog = GenericDialog('Align Batch 7 Options')
+			errorDialog.addMessage('bAlignBatch7 Error !!!')
+			errorDialog.addMessage('There can not be any spaces in the path.')
+			errorDialog.addMessage('Please remove spaces and try again.')
+			errorDialog.addMessage('Offending path is:')
+			errorDialog.addMessage(sourceFolder)
+			errorDialog.showDialog()
 			return 0
 	else:
 		sourceFolder = sys.argv[1] #assuming it ends in '/'
@@ -665,7 +768,7 @@ def run():
 		runOneFolder(sourceFolder)
 
 	bPrintLog('=====================================', 0)
-	bPrintLog('Done bAlign_Batch_v6', 0)
+	bPrintLog('Done bAlign_Batch_v7', 0)
 	bPrintLog('=====================================', 0)
         bPrintLog(' ', 0)
 

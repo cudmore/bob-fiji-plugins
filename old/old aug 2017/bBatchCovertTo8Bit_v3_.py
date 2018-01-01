@@ -27,10 +27,11 @@
 #   Java 1.6.0_65 (54-bit)
 
 import os
+
 from ij import IJ, ImagePlus
 from ij.io import FileSaver, DirectoryChooser
-import sys
-import re
+from ij.gui import GenericDialog
+import sys, time
 
 #function to get user options
 def getOptions():
@@ -58,7 +59,10 @@ def run():
 
 	global numberOfChannels
 	global replaceExisting
+	global gVersion
 
+	gVersion = 3.1
+	
 	# Expecting one argument: the file path
 	if len(sys.argv) < 2:
 		print "   We need a hard-drive folder with .tif stacks as input"
@@ -89,10 +93,14 @@ def run():
 	
 	print "   Processing source folder: ", sourceFolder  
 	print "   Saving to destination folder: ", destFolder  
-	IJ.log("   ====== Startin bBatchConvertTo8Bitv3 ======")
-	IJ.log("   Processing source folder: " + sourceFolder)
+	IJ.log(" ")
+	IJ.log("   ====== Starting bBatchConvertTo8Bit_v3 ======")
+	IJ.log("   Processing from source folder: " + sourceFolder)
 	IJ.log("   Saving to destination folder: " + destFolder)
-
+	IJ.log("   gVersion=" + str(gVersion))
+	IJ.log("   numberOfChannels=" + str(numberOfChannels))
+	IJ.log("   replaceExisting=" + str(replaceExisting))
+	
 	numOpened = 0
 	numSaved = 0
 
@@ -126,7 +134,7 @@ def run():
 					continue #with next iteration
 			
 			print "   ===================================="
-			msgStr = "   -> Opening " + sourceFolder+filename  
+			msgStr = "   -->> Opening " + sourceFolder+filename  
 			print msgStr
 			IJ.log(msgStr)
 			imp = IJ.openImage(sourceFolder + filename)
@@ -138,43 +146,13 @@ def run():
 			
 			imp.show()
 			numOpened +=1
-			
-			#i can't get properties as long list of {key=value}
-			#how do i then set each property in new imp1/imp2? Do IJ.openImagehave ot loop?
-			#infoProperty = imp.getInfoProperty() #Returns the "Info" property string, java.lang.String
-			#print 'infoProperty'
-			#print infoProperty
 
-			#.getProp(key) #Returns the value from the "Info" property string associated with 'key'
+			infoStr = imp.getProperty("Info") #get all .tif tags
+			if not infoStr:
+				infoStr = ''
+			infoStr += 'bBatchConvertTo8Bit_Version=' + str(gVersion) + '\n'
+			infoStr += 'bBatchConvertTo8Bit_Time=' + time.strftime("%Y%m%d") + '_' + time.strftime("%H%M%S") + '\n'
 			
-			#myProp = imp.getProperties() #returns java.util.Properties
-			#print 'myProp (really long)'
-			#print myProp
-
-			#print 'patrick'
-			#myList = str(myProp).split('\r')
-			
-			#I want' to strip out 'Info=ImageDescription: '
-			#myList = re.sub('Info=ImageDescription: ', '', str(myList))
-			
-			#for i in range (0,len(myList)):
-			#	myList[i] = myList[i].split('=')
-			
-			#print myList[0]
-			#print myList[1]
-			#print myList[2]
-			#print myList[3]
-
-			#imp.setProperty('myStr', 1)
-
-			#try usinf ImageStack
-			#myImageStack = imp.getImageStack()
-			
-			#eventuallly just call imp.getProp(str) which Returns the value from the "Info"
-			
-			#in the future IJ.openImagehavewant to have option to scale down to 512X512
-			#run("Scale...", "x=- y=- z=1.0 width=512 height=512 depth=196 interpolation=Bilinear average process create title=20131007_a144_008_ch1-1.tif");
-
 			msgStr = "      Original Image is: " + str(imp.width) + " X " + str(imp.height) + " X " + str(imp.getNSlices())
 			print msgStr
 			IJ.log(msgStr)
@@ -192,6 +170,7 @@ def run():
 					#
 					#ch2
 					imp2 = IJ.getImage()
+					imp2.setProperty("Info", infoStr);
 					fs = FileSaver(imp2)
 					msgStr = "      ch2: Saving deinterleaved 8bit File to: " + outPath2
 					print msgStr
@@ -224,6 +203,7 @@ def run():
 					#
 					#ch1
 					imp1 = IJ.getImage()
+					imp1.setProperty("Info", infoStr);
 					fs = FileSaver(imp1)
 					msgStr = "      ch1: Saving deinterleaved 8bit File to" + outPath1
 					print msgStr
@@ -253,6 +233,8 @@ def run():
 					imp1.close()
 				
 				elif numberOfChannels == 1: #single channel
+					imp.setProperty("Info", infoStr);
+					
 					fs = FileSaver(imp)
 					msgStr = "      Saving 8bit File to" + outPath
 					print msgStr
@@ -294,10 +276,11 @@ def run():
 				print msgStr
 				IJ.log(msgStr)
 
-	msgStr = "   bBatchConvertTo8Bitv3.py is Done, Number Opened " + str(numOpened) + ", Number Saved " + str(numSaved)
-	print "   ==="
+	msgStr = "   ====== bBatchConvertTo8Bitv3.py is Done ======"
 	print msgStr
-	print "   ==="
+	IJ.log(msgStr)
+	msgStr = "   Total Number Opened " + str(numOpened) + ", Total Number Saved " + str(numSaved)
+	print msgStr
 	IJ.log(msgStr)
 
 run()
