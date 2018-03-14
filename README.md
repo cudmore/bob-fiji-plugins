@@ -4,6 +4,15 @@ This repository is a collection of Fiji/ImageJ plugins we use for our image anal
 
 Please let us know if you use any of these plugins. We are providing this code as a service to the community and expect to be told when they are useful. As always, email Robert Cudmore with questions, comments, or bugs.
 
+## Install
+
+Click on the green 'Clone or download' button and select 'Download ZIP'. Once you have the .zip file, extract it and drag and drop desired plugin onto the main Fiji window. Run the plugin from the Fiji editor with the 'Run' menu or using keyboard ctrl+r.
+
+## Usage
+
+ - **bFolder2MapManager.** For Zeiss LSM/CZI or ScanImage files.
+ - **bPrairie2tif.** For Brucker Prairie View files.
+ 
 ### bAlignFolder_v0.0_
 
 Align a folder of .tif images. For 2-3 color channel images, allows the user to choose the channel for alignment and will apply this alignment to other color channels. This plugin requires:
@@ -16,7 +25,7 @@ Convert a folder of .tif images into 8-bit. By default this will expand the hist
 
 ### bFolder2MapManager.v0.0_
 
-Convert a folder of image files into single channel .tif files. This will convert Zeiss LSM/CZI, and Scan Image 3.8/4.x.
+Convert a folder of image files into single channel .tif files. This will convert **Zeiss LSM/CZI*, and *Scan Image 3.8/4.x**.
 
 ### bMaxProject_
 
@@ -24,7 +33,7 @@ Create maximal intensity projection images from each .tif stack in a folder.
 
 ### bPrairie2tif.v0.0_
 
-Convert the native Bruker Prairie View .tif format which is a folder of single image plane .tif files into a single .tif image volume/time-series.
+Convert the native **Bruker Prairie View** .tif format which is a folder of single image plane .tif files into a single .tif image volume/time-series.
 
 ### bScramble_
 
