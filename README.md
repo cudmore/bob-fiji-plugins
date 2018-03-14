@@ -25,7 +25,7 @@ Convert a folder of .tif images into 8-bit. By default this will expand the hist
 
 ### bFolder2MapManager.v0.0_
 
-Convert a folder of image files into single channel .tif files. This will convert **Zeiss LSM/CZI*, and *Scan Image 3.8/4.x**.
+Convert a folder of image files into single channel .tif files. This will convert **Zeiss LSM/CZI**, and **Scan Image 3.8/4.x**.
 
 ### bMaxProject_
 
