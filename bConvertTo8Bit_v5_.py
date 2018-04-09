@@ -6,6 +6,11 @@ Take a folder of .tif and convert all 16-bit tif to 8-bit
  - Scale pixels down using the source bit-depth (assuming we find b_bitDepth)
  -   The default behavior of Fiji/ImageJ 'convert to 8 bit' is to scale based on the max intensity in the image
  - If .tif is already 8-bit then just copy to destination
+ 
+ Changes:
+ 
+ 	20180104	- Added gReplaceExisting
+ 				- Strip out dot '.' files
  '''
 
 #python
@@ -21,6 +26,7 @@ from ij.io import DirectoryChooser, FileSaver
 from ij.process import ImageConverter # by default convert to 8-bit will scale, i need to turn ot off. See: https://ilovesymposia.com/2014/02/26/fiji-jython/
 
 gUseEnclosingFolderNameInOutputFolder = True
+gReplaceExisting = False # if True then replace existing output, if False then do not replace exiting output
 
 def bPrintLog(text, indent=0):
 	msgStr = ''
@@ -33,8 +39,7 @@ def bPrintLog(text, indent=0):
 def bTifList(srcFolder):
 	tifList = []
 	for child in os.listdir(srcFolder):
-		#print 'srcFolder:', srcFolder, 'child:', child
-		if child.endswith('.tif'):
+		if child.endswith('.tif') and child.find('.',0) != 0: # .tif files NOT starting with dot '.'
 			tifList.append(srcFolder + child)
 	return tifList
 
@@ -159,6 +164,9 @@ def runOneFolder(srcFolder):
 		tifFileName = os.path.split(tifFilePath)[1]
 		#tifFileName = 'max_' + tifFileName
 		dstTifPath = dstFolder + tifFileName
+		if os.path.isfile(dstTifPath) and not gReplaceExisting:
+			print '\tskipping:', tifFilePath
+			continue
 		runOneTif(tifFilePath, dstTifPath)
 
 		numTif += 1

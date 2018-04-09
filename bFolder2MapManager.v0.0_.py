@@ -167,6 +167,9 @@ class bImp:
 		self.infoStr += 'b_date=' + self.dateStr + '\n'
 		self.infoStr += 'b_time=' + self.timeStr + '\n'
 		
+		# yevgeniya 20180314
+		#if (self.numChannels > 3):
+		#	self.numChannels = 3
 		self.infoStr += 'b_numChannels=' + str(self.numChannels) + '\n'
 		self.infoStr += 'b_pixelsPerline=' + str(self.width) + '\n'
 		self.infoStr += 'b_linesPerFrame=' + str(self.height) + '\n'

@@ -138,5 +138,6 @@ if __name__ in ['__main__', '__builtin__']:
 
 	sourceFolder = DirectoryChooser("Please Choose A Directory Of .lsm Files").getDirectory()
 
-	do_scramble(sourceFolder)
+	if sourceFolder:
+		do_scramble(sourceFolder)
 	
